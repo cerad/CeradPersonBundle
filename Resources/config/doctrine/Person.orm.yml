@@ -1,0 +1,128 @@
+Cerad\Bundle\PersonBundle\Entity\Person:
+    type:  entity
+    table: persons
+    repositoryClass: Cerad\Bundle\PersonBundle\EntityRepository\PersonRepository
+    changeTrackingPolicy: NOTIFY
+    
+    lifecycleCallbacks:
+        prePersist: [ onPrePersist ]
+        preUpdate:  [ onPreUpdate  ]
+        postLoad:   [ onPostLoad   ]
+    
+    id:
+        id:
+            type: integer
+            generator: { strategy: AUTO }
+            
+    oneToMany:     
+        feds:
+            targetEntity: PersonFed
+            mappedBy:     person
+            indexBy:      fedRole
+            cascade:      ['all']
+            
+        plans:
+            targetEntity: PersonPlan
+            mappedBy:     person
+            indexBy:      projectId
+            cascade:      ['all']
+            
+        persons:
+            targetEntity: PersonPerson
+            mappedBy:     parent
+            cascade:      ['all']
+             
+    fields:
+      
+        guid:
+            column:   guid
+            type:     string
+            length:   40
+            nullable: false
+            unique:   true
+      
+        # ===================================
+        # PersonName
+        nameFull:
+            column:   name_full
+            type:     string
+            length:   80
+            nullable: true # Until it becomes a problem
+            
+        nameFirst:
+            column:   name_first
+            type:     string
+            length:   40
+            nullable: true
+            
+        nameLast:
+            column:   name_last
+            type:     string
+            length:   40
+            nullable: true
+            
+        nameNick:
+            column:   name_nick
+            type:     string
+            length:   40
+            nullable: true
+            
+        nameMiddle:
+            column:   name_middle
+            type:     string
+            length:   40
+            nullable: true
+ 
+        email:
+            type:     string
+            length:   80
+            nullable: true
+            
+        phone:
+            column:   phone
+            type:     string
+            length:   20
+            nullable: true
+            
+        gender:
+            type:     string
+            length:   1
+            nullable: true
+            
+        dob:
+            type:     date
+            nullable: true
+            
+        addressCity:
+            column:   address_city
+            type:     string
+            length:   40
+            nullable: true
+            
+        addressState:
+            column:   address_state
+            type:     string
+            length:   10
+            nullable: true
+            
+        addressZipcode:
+            column:   address_zipcode
+            type:     string
+            length:   10
+            nullable: true
+             
+        notes:
+            column:   notes
+            type:     text
+            nullable: true
+           
+        status:
+            type:     string
+            length:   20
+            nullable: false
+            
+        verified:
+            type:     string
+            length:   20
+            nullable: true
+                        

@@ -1,0 +1,92 @@
+Cerad\Bundle\PersonBundle\Entity\PersonFed:
+    type:  entity
+    table: person_feds
+    changeTrackingPolicy: NOTIFY
+    uniqueConstraints:
+        person_fed_role_index:
+            columns: fed_role, person_id
+    
+    id:
+       id:
+           type: integer
+           generator: { strategy: AUTO }
+                
+    manyToOne:
+        person:
+            targetEntity: Person
+            inversedBy:   feds
+            
+    oneToMany:
+                  
+      #orgs:
+      #    targetEntity: PersonFedOrg
+      #    mappedBy:     fed
+      #    indexBy:      role
+      #    cascade:      ['all']
+            
+       certs:
+           targetEntity: PersonFedCert
+           mappedBy:     personFed
+           indexBy:      role
+           cascade:      ['all']
+                        
+    fields:
+      
+        personVerified:
+            column:   person_verified
+            type:     string
+            length:   20
+            nullable: true
+          
+        fed:
+            column:   fed     # AYSO,USSF,NFHS
+            type:     string
+            length:   20
+            nullable: false
+            
+        fedRole:
+            column:   fed_role # AYSOV, AYSOP, USSFC, NFHSC
+            type:     string
+            length:   20
+            nullable: false
+            
+        fedRoleDate:
+            column:   fed_role_date
+            type:     date
+            nullable: true
+            
+        fedKey:
+            column:   fed_key
+            type:     string
+            length:   40
+            nullable: true  # Fill in later?, Otherwise globally unique
+            unique:   true
+            
+        fedKeyVerified:
+            column:   fed_key_verified
+            type:     string
+            length:   20
+            nullable: true
+            
+        orgKey:
+            column:   org_key
+            type:     string
+            length:   40
+            nullable: true
+            
+        orgKeyVerified:
+            column:   org_key_verified
+            type:     string
+            length:   20
+            nullable: true
+            
+        memYear:
+            column:   mem_year
+            type:     string
+            length:   20
+            nullable: true
+                                   
+        status:
+            type:     string
+            length:   20
+            nullable: false

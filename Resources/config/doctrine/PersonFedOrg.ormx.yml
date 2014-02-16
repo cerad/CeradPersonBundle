@@ -1,0 +1,54 @@
+Cerad\Bundle\PersonBundle\Entity\PersonFedOrg:
+    type:  entity
+    table: person_fed_orgs
+    changeTrackingPolicy: NOTIFY
+    uniqueConstraints:
+        person_fed_org_role_index:
+            columns: fed_id, role, org_key
+    
+    id:
+        id:
+            type: integer
+            generator: { strategy: AUTO }
+            
+    manyToOne:
+      
+        fed:
+            targetEntity: PersonFed
+            inversedBy:   orgs
+             
+    fields:
+            
+        role:
+            column:   role
+            type:     string
+            length:   20
+            nullable: false
+            
+        roleDate:
+            column:   role_date
+            type:     date
+            nullable: true
+            
+        orgKey:
+            column:   org_key
+            type:     string
+            length:   40
+            nullable: false
+            
+        orgKeyVerified:
+            column:   org_key_verified
+            type:     string
+            length:   20
+            nullable: true
+            
+        memYear:
+            column:   mem_year
+            type:     string
+            length:   20
+            nullable: true
+           
+        status:
+            type:     string
+            length:   20
+            nullable: false

@@ -1,0 +1,76 @@
+Cerad\Bundle\PersonBundle\Entity\PersonPlan:
+    type:  entity
+    table: person_plans
+    changeTrackingPolicy: NOTIFY
+    uniqueConstraints:
+        person_plan_project_person_id_index:
+            columns: project_id, person_id
+    indexes:
+        person_plan_project_person_name_index: # Should eventually be unique
+            columns: [ project_id, person_name ]
+   
+    id:
+        id:
+            type: integer
+            generator: { strategy: AUTO }
+            
+    manyToOne:
+      
+        person:
+            targetEntity: Person
+            inversedBy:   plans
+             
+    fields:
+      
+        projectId:
+            column:   project_id
+            type:     string
+            length:   40
+            nullable: false
+            
+        personName:
+            column:   person_name
+            type:     string
+            length:   80
+            nullable: true
+            
+        status:
+            type:     string
+            length:   20
+            nullable: false
+            
+        verified:
+            type:     string
+            length:   20
+            nullable: true
+
+        createdOn:
+            column:   created_on
+            type:     datetime
+            nullable: true
+            
+        updatedOn:
+            column:   updated_on
+            type:     datetime
+            nullable: true
+            
+        basic:
+            column:   basic
+            type:     array
+            nullable: false
+            
+        level:
+            column:   level
+            type:     array
+            nullable: true
+            
+        avail:
+            column:   avail
+            type:     array
+            nullable: true
+            
+        notes:
+            column:   notes
+            type:     text
+            nullable: true
+

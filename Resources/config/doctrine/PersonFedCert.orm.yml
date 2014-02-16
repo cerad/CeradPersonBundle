@@ -1,0 +1,81 @@
+Cerad\Bundle\PersonBundle\Entity\PersonFedCert:
+    type:  entity
+    table: person_fed_certs
+    changeTrackingPolicy: NOTIFY
+    uniqueConstraints:
+        person_fed_cert_role_index:
+            columns: person_fed_id, role, org_key
+    
+    id:
+        id:
+            type: integer
+            generator: { strategy: AUTO }
+            
+    manyToOne:
+                  
+        personFed:
+            targetEntity: PersonFed
+            joinColumn:
+                name:                 person_fed_id
+                referencedColumnName: id
+            inversedBy:   certs
+            
+    fields:
+            
+        role:
+            column:   role
+            type:     string
+            length:   20
+            nullable: false
+            
+        roleDate:
+            column:   role_date
+            type:     date
+            nullable: true
+             
+        badge:
+            column:   badge
+            type:     string
+            length:   20
+            nullable: true
+            
+        badgeDate:
+            column:   badge_date
+            type:     date
+            nullable: true
+            
+        badgeVerified:
+            column:   badge_verified
+            type:     string
+            length:   20
+            nullable: true
+            
+        badgeUser:
+            column:   badge_user
+            type:     string
+            length:   20
+            nullable: true
+            
+        upgrading:
+            column:   upgrading
+            type:     string
+            length:   20
+            nullable: true
+                
+        orgKey:
+            column:   org_key
+            type:     string
+            length:   40
+            nullable: true
+            
+        memYear:
+            column:   mem_year
+            type:     string
+            length:   20
+            nullable: true
+            
+        status:
+            type:     string
+            length:   20
+            nullable: false
+            

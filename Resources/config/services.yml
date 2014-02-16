@@ -1,0 +1,195 @@
+# PersonBundle Services
+parameters:
+    
+    cerad_person.aysov_referee_badge.form_type.class: 
+        Cerad\Bundle\PersonBundle\FormType\AYSO\RefereeBadgeFormType
+    
+    cerad_person__person_event_listener__class:
+        Cerad\Bundle\PersonBundle\EventListener\PersonEventListener
+
+services:
+
+# ===================================================================
+# Repository and listeners
+    cerad_person.entity_manager.doctrine:
+        alias: doctrine.orm.default_entity_manager
+
+    cerad_person.person_repository.doctrine:
+        class:  Cerad\Bundle\PersonBundle\Entity\PersonRepository
+        factory_service: 'cerad_person.entity_manager.doctrine'
+        factory_method:  'getRepository'
+        arguments:  
+            - 'Cerad\Bundle\PersonBundle\Entity\Person'
+            
+    cerad_person.person_repository:
+        alias: cerad_person.person_repository.doctrine
+        
+    cerad_person__person_repository:
+        alias: cerad_person.person_repository.doctrine
+        
+    cerad_person__person_event_listener:
+        class: '%cerad_person__person_event_listener__class%'
+        calls:
+             - [setContainer, ['@service_container']]
+        tags:
+            - { name: kernel.event_subscriber }
+        arguments:
+            - 'cerad_person__person_repository'
+
+# ====================================================
+# Data transformers
+    cerad_person.aysor_id.data_transformer:
+        class: Cerad\Bundle\PersonBundle\DataTransformer\AYSO\RegionIdTransformer
+                        
+    cerad_person.aysov_id.data_transformer:
+        class: Cerad\Bundle\PersonBundle\DataTransformer\AYSO\VolunteerIdTransformer
+        
+    cerad_person.aysov_id.data_transformer.fake:
+        class: Cerad\Bundle\PersonBundle\DataTransformer\AYSO\VolunteerIdTransformer
+        arguments: [true]
+        
+    cerad_person.aysov_id_fake.data_transformer:
+        class: Cerad\Bundle\PersonBundle\DataTransformer\AYSO\VolunteerIdTransformer
+        arguments: [true]
+        
+    cerad_person.ussfs_id.data_transformer:
+        class: Cerad\Bundle\PersonBundle\DataTransformer\USSF\StateIdTransformer
+                        
+    cerad_person.ussfc_id.data_transformer:
+        class: Cerad\Bundle\PersonBundle\DataTransformer\USSF\ContractorIdTransformer
+        
+    cerad_person.ussfc_id.data_transformer.fake:
+        class: Cerad\Bundle\PersonBundle\DataTransformer\USSF\ContractorIdTransformer
+        arguments: [true]
+        
+    cerad_person.ussfc_id_fake.data_transformer:
+        class: Cerad\Bundle\PersonBundle\DataTransformer\USSF\ContractorIdTransformer
+        arguments: [true]
+        
+    cerad_person.phone.datatransformer:
+        class: Cerad\Bundle\PersonBundle\DataTransformer\PhoneTransformer
+                
+# ====================================================
+# Person Form Types
+
+    cerad_person.phone.form_type:
+        class: Cerad\Bundle\PersonBundle\FormType\PhoneFormType
+        tags:
+            - { name: form.type, alias: cerad_person_phone }
+            
+    cerad_person.state.form_type:
+        class: Cerad\Bundle\PersonBundle\FormType\StateFormType
+        tags:
+            - { name: form.type, alias: cerad_person_state }
+            
+    cerad_person.verified.form_type:
+        class: Cerad\Bundle\PersonBundle\FormType\VerifiedFormType
+        tags:
+            - { name: form.type, alias: cerad_person_verified }
+            
+    cerad_person.upgrading.form_type:
+        class: Cerad\Bundle\PersonBundle\FormType\UpgradingFormType
+        tags:
+            - { name: form.type, alias: cerad_person_upgrading }
+            
+    cerad_person.gender.form_type:
+        class: Cerad\Bundle\PersonBundle\FormType\GenderFormType
+        tags:
+            - { name: form.type, alias: cerad_person_gender }
+            
+    cerad_person.date.form_type:
+        class: Cerad\Bundle\PersonBundle\FormType\DateFormType
+        tags:
+            - { name: form.type, alias: cerad_person_date }
+            
+    cerad_person.shirt_size.form_type:
+        class: Cerad\Bundle\PersonBundle\FormType\ShirtSizeFormType
+        tags:
+            - { name: form.type, alias: cerad_person_shirt_size }
+
+# =======================================================
+# Person Plans
+    cerad_person.plan_will_attend.form_type:
+        class: Cerad\Bundle\PersonBundle\FormType\Plan\WillAttendFormType
+        tags:
+            - { name: form.type, alias: cerad_person_plan_will_attend }
+            
+    cerad_person.plan_will_referee.form_type:
+        class: Cerad\Bundle\PersonBundle\FormType\Plan\WillRefereeFormType
+        tags:
+            - { name: form.type, alias: cerad_person_plan_will_referee }
+            
+    cerad_person.plan_want_mentor.form_type:
+        class: Cerad\Bundle\PersonBundle\FormType\Plan\WantMentorFormType
+        tags:
+            - { name: form.type, alias: cerad_person_plan_want_mentor }
+            
+    cerad_person.plan_will_mentor.form_type:
+        class: Cerad\Bundle\PersonBundle\FormType\Plan\WillMentorFormType
+        tags:
+            - { name: form.type, alias: cerad_person_plan_will_mentor }
+       
+# ==========================================================
+# AYSO Form Types
+
+    cerad_person.aysov_id.form_type:
+        class: Cerad\Bundle\PersonBundle\FormType\AYSO\VolunteerIdFormType
+        tags:
+            - { name: form.type, alias: cerad_person_aysov_id } 
+        
+    cerad_person.aysov_id_fake.form_type:
+        class: Cerad\Bundle\PersonBundle\FormType\AYSO\VolunteerIdFormType
+        arguments: [true]
+        tags:
+            - { name: form.type, alias: cerad_person_aysov_id_fake } 
+            
+    cerad_person.aysov_referee_badge.form_type:
+        class: %cerad_person.aysov_referee_badge.form_type.class%
+        tags:
+            - { name: form.type, alias: cerad_person_aysov_referee_badge } 
+            
+    cerad_person.aysov_safe_haven_badge.form_type:
+        class: Cerad\Bundle\PersonBundle\FormType\AYSO\SafeHavenBadgeFormType
+        tags:
+            - { name: form.type, alias: cerad_person_aysov_safe_haven_badge } 
+            
+    cerad_person.aysov_org_region_id.form_type:
+        class: Cerad\Bundle\PersonBundle\FormType\AYSO\RegionIdFormType
+        tags:
+            - { name: form.type, alias: cerad_person_ayso_region_id } 
+            
+    cerad_person.ayso_mem_year.form_type:
+        class: Cerad\Bundle\PersonBundle\FormType\AYSO\MemYearFormType
+        tags:
+            - { name: form.type, alias: cerad_person_ayso_mem_year } 
+            
+    cerad_person.aysov_org_id.form_type:
+        alias: cerad_person.aysov_org_region_id.form_type
+
+# ====================================================
+# USSF Form Types
+
+    cerad_person.ussfc_id.form_type:
+        class: Cerad\Bundle\PersonBundle\FormType\USSF\ContractorIdFormType
+        arguments: [false]
+        tags:
+            - { name: form.type, alias: cerad_person_ussfc_id }
+            
+    cerad_person.ussfc_id_fake.form_type:
+        class: Cerad\Bundle\PersonBundle\FormType\USSF\ContractorIdFormType
+        arguments: [true]
+        tags:
+            - { name: form.type, alias: cerad_person_ussfc_id_fake } 
+            
+    cerad_person.ussfc_org_state_id.form_type:
+        class: Cerad\Bundle\PersonBundle\FormType\USSF\StateIdFormType
+        tags:
+            - { name: form.type, alias: cerad_person_ussf_state_id } 
+            
+    cerad_person.ussfc_org_id.form_type:
+        alias: cerad_person.ussfc_org_state_id.form_type
+
+    cerad_person.ussfc_referee_badge.form_type:
+        class: Cerad\Bundle\PersonBundle\FormType\USSF\RefereeBadgeFormType
+        tags:
+            - { name: form.type, alias: cerad_person_ussfc_referee_badge } 

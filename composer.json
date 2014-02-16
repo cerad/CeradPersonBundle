@@ -1,0 +1,24 @@
+{
+    "name":        "cerad/project-bundle",
+    "type":        "symfony-bundle",
+    "description": "Symfony Cerad Project Bundle",
+    "keywords":    ["cerad","zayso"],
+    "homepage":    "http://github.com/cerad/ProjectBundle",
+    "license":     "MIT",
+    "authors": [
+        {
+            "name": "Art Hundiak",
+            "email": "ahundiak@gmail.com",
+            "homepage": "http://zayso.org",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.3"
+    },
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-0": { "Cerad\\Bundle\\ProjectBundle\\": "" }
+    },
+    "target-dir": "Cerad/Bundle/ProjectBundle"
+}
