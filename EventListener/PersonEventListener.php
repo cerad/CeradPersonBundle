@@ -17,11 +17,11 @@ class PersonEventListener extends ContainerAware implements EventSubscriberInter
     {
         return array
         (
+            PersonEvents::FindPerson              => array('onFindPerson'        ),
             PersonEvents::FindPersonById          => array('onFindPersonById'    ),
             PersonEvents::FindPersonByGuid        => array('onFindPersonByGuid'  ),
             PersonEvents::FindPersonByFedKey      => array('onFindPersonByFedKey'),
             
-            PersonEvents::FindPersonByProjectName => array('onFindPersonByProjectName'),
             
             PersonEvents::FindOfficialsByProject  => array('onFindOfficialsByProject'),
             
