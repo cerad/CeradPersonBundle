@@ -21,6 +21,9 @@ services:
         arguments:  
             - 'Cerad\Bundle\PersonBundle\Entity\Person'
             
+    cerad_person__person_repository:
+        alias: cerad_person.person_repository.doctrine
+        
     cerad_person.person_repository:
         alias: cerad_person.person_repository.doctrine
         
