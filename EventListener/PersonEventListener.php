@@ -8,7 +8,8 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 use Cerad\Bundle\CoreBundle\Events\PersonEvents;
 
-use Cerad\Bundle\CoreBundle\Event\Person\FindByEvent;
+use Cerad\Bundle\CoreBundle\Event\FindPersonEvent;
+
 use Cerad\Bundle\CoreBundle\Event\Person\FindPlanByProjectAndPersonEvent;
 
 class PersonEventListener extends ContainerAware implements EventSubscriberInterface
@@ -18,9 +19,9 @@ class PersonEventListener extends ContainerAware implements EventSubscriberInter
         return array
         (
             PersonEvents::FindPerson              => array('onFindPerson'        ),
-            PersonEvents::FindPersonById          => array('onFindPersonById'    ),
-            PersonEvents::FindPersonByGuid        => array('onFindPersonByGuid'  ),
-            PersonEvents::FindPersonByFedKey      => array('onFindPersonByFedKey'),
+          //PersonEvents::FindPersonById          => array('onFindPersonById'    ),
+          //PersonEvents::FindPersonByGuid        => array('onFindPersonByGuid'  ),
+          //PersonEvents::FindPersonByFedKey      => array('onFindPersonByFedKey'),
             
             
             PersonEvents::FindOfficialsByProject  => array('onFindOfficialsByProject'),
@@ -67,6 +68,18 @@ class PersonEventListener extends ContainerAware implements EventSubscriberInter
         $event->person = $this->getPersonRepository()->findOneByByProjectName($event->projectKey,$event->personName);
         
         return;
+    }
+    /* ==============================================================
+     * Individual finders
+     */
+    public function onFindPerson(FindPersonEvent $event)
+    {
+        $person = $this->getPersonRepository()->findPerson($event->getSearch());
+        if ($person)
+        {
+             $event->setPerson($person);
+             $event->stopPropagation();
+        }
     }
     public function onFindPersonById(FindByEvent $event)
     {

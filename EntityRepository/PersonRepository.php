@@ -2,33 +2,82 @@
 
 namespace Cerad\Bundle\PersonBundle\EntityRepository;
 
-use Doctrine\ORM\EntityRepository;
+use Cerad\Bundle\CoreBundle\Doctrine\EntityRepository as BaseRepository;
 
-use Cerad\Bundle\PersonBundle\Model\PersonRepositoryInterface;
+//  Cerad\Bundle\PersonBundle\Model\PersonRepositoryInterface;
 
-use Cerad\Bundle\PersonBundle\Entity\Person as PersonEntity;
 
-class PersonRepository extends EntityRepository implements PersonRepositoryInterface
+class PersonRepository extends BaseRepository // implements PersonRepositoryInterface
 {
-    /* ==========================================================
-     * Find stuff
-     */
-    public function find($id)
-    {
-        return $id ? parent::find($id) : null;
-    }
-    public function findAll() { return parent::findAll(); }
+    function createPerson($params = null) { return $this->createEntity($params); }
     
+    // id,guid,fedKey
+    public function findPerson($param)
+    {
+        // Avoid nulls
+        if (!($param = trim($param))) return null;
+        
+        $qb = $this->createQueryBuilder('person');
+        
+        $where = <<<EOT
+(person.id   = :param) OR 
+(person.guid = :param)
+EOT;
+        $qb->andWhere($where); 
+        
+        $qb->setParameter('param', trim($param));
+        
+        $items = $qb->getQuery()->getResult();
+        
+        if (count($items) == 1) return $items[0];
+        
+        $item = $this->findByFedKey($param);
+        if ($item) return $item;
+        
+        return null; 
+    }
     public function findByGuid($guid)
     {
         return $guid ? $this->findOneBy(array('guid' => $guid)) : null;
     }
-    public function findByFedKey($fedKey)
+    /* ===================================================
+     * The fed key could be
+     * AYSOV12341234 OR
+     *      12341234
+     * 
+     * TODO: Make FedRole an option and adjust accordingly
+     */
+    public function findByFedKey($fedKey, $fedRole = null)
     {   
-        $fed = $fedKey ? $this->findFedByFedKey($fedKey) : null;
+        // Avoid nulls
+        if (!($fedKey = trim($fedKey))) return null;
         
-        return $fed ? $fed->getPerson() : null;
+        $repo = $this->getEntityManager()->getRepository('CeradPersonBundle:PersonFed');
+        
+        $qb = $repo->createQueryBuilder('personFed');
+        $qb->leftJoin ('personFed.person','person');
+        $qb->addSelect('person');
+        
+        $where = <<<EOT
+(personFed.fedKey = :fedKey)      OR
+(personFed.fedKey = :fedKeyUSSFC) OR
+(personFed.fedKey = :fedKeyAYSOV)
+EOT;
+        $qb->andWhere($where); 
+        
+        $qb->setParameter('fedKey',                $fedKey);
+        $qb->setParameter('fedKeyUSSFC', 'USSFC' . $fedKey);
+        $qb->setParameter('fedKeyAYSOV', 'AYSOV' . $fedKey);
+        
+        $items = $qb->getQuery()->getResult();
+        
+        if (count($items) != 1) return null;
+        
+        return $items[0]->getPerson();
     }
+    /* =================================================
+     * Older stuff, needs review
+     */
     public function query($projects = null)
     {
         $qb = $this->createQueryBuilder('person');
@@ -147,30 +196,19 @@ class PersonRepository extends EntityRepository implements PersonRepositoryInter
         $repo = $this->_em->getRepository('CeradPersonBundle:PersonPerson');
         return $repo->find($id);        
     }
-    /* ==========================================================
-     * Allow creating objects via static methods
+    /* ================================================
+     * For testing
      */
-    function createPerson($params = null) { return new PersonEntity($params); }
-    
-    /* ==========================================================
-     * Persistence
-     */
-    public function save  ($entity) { $this->getEntityManager()->persist($entity); }
-    public function delete($entity) { $this->getEntityManager()->delete ($entity); }
-    
-    public function commit() { return $this->getEntityManager()->flush(); }
-    public function clear()  { return $this->getEntityManager()->clear(); }
-    
     public function truncate()
     {
         die('personRepo.truncate');
         $conn = $this->_em->getConnection();
         $conn->executeUpdate('DELETE FROM person_fed_certs;' );
-        $conn->executeUpdate('DELETE FROM person_fed_orgs;'  );
+      //$conn->executeUpdate('DELETE FROM person_fed_orgs;'  );
         $conn->executeUpdate('DELETE FROM person_feds;'      );
         
         $conn->executeUpdate('ALTER TABLE person_fed_certs AUTO_INCREMENT = 1;');
-        $conn->executeUpdate('ALTER TABLE person_fed_orgs  AUTO_INCREMENT = 1;');
+      //$conn->executeUpdate('ALTER TABLE person_fed_orgs  AUTO_INCREMENT = 1;');
         
         $conn->executeUpdate('DELETE FROM person_persons;');
         $conn->executeUpdate('DELETE FROM person_plans;'  );
@@ -179,52 +217,6 @@ class PersonRepository extends EntityRepository implements PersonRepositoryInter
         $conn->executeUpdate('ALTER TABLE person_persons AUTO_INCREMENT = 1;');
         $conn->executeUpdate('ALTER TABLE person_plans   AUTO_INCREMENT = 1;');
         $conn->executeUpdate('ALTER TABLE persons        AUTO_INCREMENT = 1;');        
-    }
-    /* ===============================================================
-     * This should probably go in a manager or some place
-     * Changing the fed id can be complicated at best
-     * 
-     * Some of this can go away once the database is refactored and 
-     * no longer need to cascade id updates
-     */
-    public function changeFedId($oldFed,$newId,$commit = true)
-    {
-        die('personRepo.changeFedId');
-        // Make sure it realy needs changing
-        if ($oldFed->getId() == $newId) return;
-        
-        // For now, newId cannot exist
-        $fedx = $this->findFed($newId);
-        if ($fedx) return;
-        
-        // Need a new fed and then transfer
-        $newFed = new PersonFed();
-        $newFed->setId($newId);
-        $newFed->setFedRoleId($oldFed->getFedRoleId());
-        
-        // Connect person to new fed
-        $person = $oldFed->getPerson();
-        $person->removeFed($oldFed);
-        $person->addFed   ($newFed);
-      //$newFed->setPerson($person);
-        
-        // Connect certs and orgs to new fed
-        foreach($oldFed->getCerts() as $cert)
-        {
-            $oldFed->removeCert($cert);
-            $cert->setFed($newFed);
-        }
-        foreach($oldFed->getOrgs() as $org)
-        {
-            $oldFed->removeOrg($org);
-            $org->setFed($newFed);
-         }
-        
-        // Remove old fed
-        $em = $this->getEntityManager();
-        $em->remove ($oldFed);
-      //$em->persist($newFed);
-        if ($commit) $em->flush();
     }
 }
 ?>
