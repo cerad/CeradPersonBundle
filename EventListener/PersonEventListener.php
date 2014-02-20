@@ -9,6 +9,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Cerad\Bundle\CoreBundle\Events\PersonEvents;
 
 use Cerad\Bundle\CoreBundle\Event\FindPersonEvent;
+use Cerad\Bundle\CoreBundle\Event\RegisterProjectPersonEvent;
 
 use Cerad\Bundle\CoreBundle\Event\Person\FindPlanByProjectAndPersonEvent;
 
@@ -27,7 +28,9 @@ class PersonEventListener extends ContainerAware implements EventSubscriberInter
             PersonEvents::FindOfficialsByProject  => array('onFindOfficialsByProject'),
             
             PersonEvents::FindPlanByProjectAndPerson     => array('onFindPlanByProjectAndPerson'),   
-            PersonEvents::FindPlanByProjectAndPersonName => array('onFindPlanByProjectAndPerson'),   
+            PersonEvents::FindPlanByProjectAndPersonName => array('onFindPlanByProjectAndPerson'),
+            
+            PersonEvents::RegisterProjectPerson => array('doRegisterProjectPerson'),
         );
     }
     protected $personRepositoryServiceId;
@@ -129,6 +132,76 @@ class PersonEventListener extends ContainerAware implements EventSubscriberInter
             }
         }
         return;
+    }
+    public function doRegisterProjectPerson(RegisterProjectPersonEvent $event)
+    {
+        // Unpack
+        $project    = $event->getProject();
+        $person     = $event->getPerson();
+        $personFed  = $event->getPersonFed();
+        $personPlan = $event->getPersonPlan();
+        
+        $assignor    = $project->getAssignor();
+        $certReferee = $personFed->getCertReferee();
+        
+        $tplData = array();
+        $tplData['project']     = $project;
+        $tplData['assignor']    = $assignor;
+        $tplData['person']      = $person;
+        $tplData['personFed']   = $personFed;
+        $tplData['personPlan']  = $personPlan;
+        $tplData['certReferee'] = $certReferee;
+        
+        $templating = $this->container->get('templating');
+        
+        // Pull from project maybe? Use event->by?
+        $tplEmailSubject = '@CeradApp/ProjectPerson/Register/RegisterEmailSubject.html.twig';
+        $tplEmailContent = '@CeradApp/ProjectPerson/Register/RegisterEmailContent.html.twig';
+        
+        $subject = $templating->render($tplEmailSubject,$tplData);
+        $content = $templating->render($tplEmailContent,$tplData);
+        
+      //echo $subject . '<br />';
+      //echo nl2br($content);
+      //die();
+      
+        // Admin stuff
+        $fromName  = $assignor->getPrefix();
+        $fromEmail = $this->container->getParameter('mailer_user'); // 'admin@zayso.org';
+        
+        // Referee stuff
+        $personName  = $person->getName()->full;
+        $personEmail = $person->getEmail();
+        
+        // Assignor stuff
+        $assignorName  = $assignor->getName();
+        $assignorEmail = $assignor->getEmail();
+        
+        // bcc stuff
+        $adminName =  'Art Hundiak';
+        $adminEmail = 'ahundiak@gmail.com';
+        
+        // This goes to the assignor
+        $assignorMessage = \Swift_Message::newInstance();
+        $assignorMessage->setSubject($subject);
+        $assignorMessage->setBody   ($content);
+        $assignorMessage->setFrom   (array($fromEmail     => $fromName));
+        $assignorMessage->setBcc    (array($adminEmail    => $adminName));
+        $assignorMessage->setTo     (array($assignorEmail => $assignorName));
+        $assignorMessage->setReplyTo(array($personEmail   => $personName));
+        
+        // This goes to the referee
+        $personMessage = \Swift_Message::newInstance();
+        $personMessage->setSubject($subject);
+        $personMessage->setBody   ($content);
+        $personMessage->setFrom   (array($fromEmail     => $fromName));
+        $personMessage->setTo     (array($personEmail   => $personName));
+        $personMessage->setReplyTo(array($assignorEmail => $assignorName));
+
+        // And send
+        $mailer = $this->container->get('mailer');
+        $mailer->send($personMessage);
+        $mailer->send($assignorMessage);
     }
 }
 ?>

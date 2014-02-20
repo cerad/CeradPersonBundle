@@ -189,6 +189,32 @@ EOT;
         
         $items = $qb->getQuery()->getResult();
         if (count($items) == 1) return $items[0];
+        
+        return null;
+    }
+    // Also accepts fedRole and personGuid
+    public function findFedByProjectAndPerson($project,$person)
+    {
+        $fedRole    = is_object($project) ? $project->getFedRole() : $project;
+        $personGuid = is_object($person)  ? $person->getGuid()     : $person;
+        
+        $repo = $this->_em->getRepository('CeradPersonBundle:PersonFed');
+        
+        $qb = $repo->createQueryBuilder('personFed');
+        
+        $qb->addSelect('person');
+        $qb->leftJoin ('personFed.person','person');
+        
+        $qb->andWhere('person.guid = :personGuid');
+        $qb->andWhere('personFed.fedRole = :fedRole' );
+        
+        $qb->setParameter('personGuid',$personGuid);
+        $qb->setParameter('fedRole',$fedRole);
+        
+        $items = $qb->getQuery()->getResult();
+        if (count($items) == 1) return $items[0];
+        
+        return null;
     }
     public function findPersonPerson($id)
     {
