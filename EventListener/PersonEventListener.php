@@ -9,6 +9,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Cerad\Bundle\CoreBundle\Events\PersonEvents;
 
 use Cerad\Bundle\CoreBundle\Event\FindPersonEvent;
+use Cerad\Bundle\CoreBundle\Event\FindFormTypeEvent;
 use Cerad\Bundle\CoreBundle\Event\RegisterProjectPersonEvent;
 
 use Cerad\Bundle\CoreBundle\Event\Person\FindPlanByProjectAndPersonEvent;
@@ -31,6 +32,8 @@ class PersonEventListener extends ContainerAware implements EventSubscriberInter
             PersonEvents::FindPlanByProjectAndPersonName => array('onFindPlanByProjectAndPerson'),
             
             PersonEvents::RegisterProjectPerson => array('doRegisterProjectPerson'),
+            
+            PersonEvents::FindFedKeyFormType => array('doFindFedKeyFormType'),
         );
     }
     protected $personRepositoryServiceId;
@@ -133,6 +136,23 @@ class PersonEventListener extends ContainerAware implements EventSubscriberInter
         }
         return;
     }
+    /* =========================================================================
+     * Return the form type for a fed key
+     */
+    public function doFindFedKeyFormType(FindFormTypeEvent $event)
+    {
+        $fedRole = $event->getSearch();
+        
+        $formTypeServiceId = sprintf('cerad_person.%s_id_Fake.form_type',$fedRole);
+
+        $formType = $this->container->get($formTypeServiceId);
+        
+        $event->setFormType($formType);
+        $event->stopPropagation();
+    }
+    /* =========================================================================
+     * Notification preson registration
+     */
     public function doRegisterProjectPerson(RegisterProjectPersonEvent $event)
     {
         // Unpack
