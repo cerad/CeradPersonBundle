@@ -12,27 +12,23 @@ class PersonRepository extends BaseRepository // implements PersonRepositoryInte
     function createPerson($params = null) { return $this->createEntity($params); }
     
     // id,guid,fedKey
+    /* ======================================
+     * id,guid,fedKey
+     * '(person.id = :id) OR (person.guid = :guid)' did not work
+     */
     public function findPerson($param)
     {
         // Avoid nulls
-        if (!($param = trim($param))) return null;
+        if (!$param) return null;
+       
+        $id = (int)$param;
+        if ($id) return $this->find($id);
         
-        $qb = $this->createQueryBuilder('person');
+        $item1 = $this->findOneBy(array('guid' => $param));
+        if ($item1) return $item1;
         
-        $where = <<<EOT
-(person.id   = :param) OR 
-(person.guid = :param)
-EOT;
-        $qb->andWhere($where); 
-        
-        $qb->setParameter('param', trim($param));
-        
-        $items = $qb->getQuery()->getResult();
-        
-        if (count($items) == 1) return $items[0];
-        
-        $item = $this->findByFedKey($param);
-        if ($item) return $item;
+        $item2 = $this->findByFedKey($param);
+        if ($item2) return $item2;
         
         return null; 
     }
