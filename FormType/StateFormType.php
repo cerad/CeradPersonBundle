@@ -20,12 +20,15 @@ class StateFormType extends AbstractType
             'choices'  => $this->choices,
             'multiple' => false,
             'expanded' => false,
+            'empty_value' => 'State',
+            'empty_data'  => null
         ));
     }
     protected $choices = array
     (
         'AL' => 'Alabama',
         'AR' => 'Arkansas',
+        'FL' => 'Florida',
         'GA' => 'Gerogia',
         'LA' => 'Louisiana',
         'MS' => 'Mississippi',

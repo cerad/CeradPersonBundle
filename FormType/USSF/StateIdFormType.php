@@ -22,12 +22,15 @@ class StateIdFormType extends AbstractType
             'choices'  => $this->choices,
             'multiple' => false,
             'expanded' => false,
+            'empty_value' => 'State',
+            'empty_data'  => null,
         ));
     }
     protected $choices = array
     (
         'USSF_AL' => 'Alabama',
         'USSF_AR' => 'Arkansas',
+        'USSF_FL' => 'Florida',
         'USSF_GA' => 'Gerogia',
         'USSF_LA' => 'Louisiana',
         'USSF_MS' => 'Mississippi',

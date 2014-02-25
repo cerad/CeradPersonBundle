@@ -13,7 +13,7 @@ use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 class RefereeBadgeFormType extends AbstractType
 { 
     public function getParent() { return 'choice'; }
-    public function getName()   { return 'cerad_person_ussf_referee_badge'; }
+    public function getName()   { return 'cerad_person_ussfc_referee_badge'; }
 
     public function setDefaultOptions(OptionsResolverInterface $resolver)
     {
