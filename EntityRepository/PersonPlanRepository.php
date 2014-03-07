@@ -6,21 +6,17 @@ use Cerad\Bundle\CoreBundle\Doctrine\EntityRepository as BaseRepository;
 
 class PersonPlanRepository extends BaseRepository
 {
-    /* =================================================
-     * Older stuff, needs review
-     */
-    public function query($projects = null)
-    {
-        $qb = $this->createQueryBuilder('person');
+    // Specifically restricted to one project
+    public function findByProject($project)
+    {   
+        $qb = $this->createQueryBuilder('personPlan');
         
-        $qb->addSelect('personPlan');
-        $qb->leftJoin ('person.plans','personPlan');
+        $qb->addSelect('person');
+        $qb->leftJoin ('personPlan.person','person');
         
-        if ($projects)
-        {
-            $qb->andWhere('personPlan.projectId IN (:projectIds)');
-            $qb->setParameter('projectIds',$projects);
-        }
+        $qb->andWhere('personPlan.projectId IN (:projectKey)');
+        $qb->setParameter('projectKey',$project->getKey());
+        
         $qb->orderBy('person.nameLast,person.nameFirst');
         
         return $qb->getQuery()->getResult();

@@ -13,9 +13,12 @@ services:
 # Repository and listeners
     cerad_person.entity_manager.doctrine:
         alias: doctrine.orm.default_entity_manager
+        
+    cerad_person__entity_manager__doctrine:
+        alias: doctrine.orm.default_entity_manager
 
     cerad_person.person_repository.doctrine:
-        class:  Cerad\Bundle\PersonBundle\Entity\PersonRepository
+        class:  Cerad\Bundle\PersonBundle\EntityRepository\PersonRepository
         factory_service: 'cerad_person.entity_manager.doctrine'
         factory_method:  'getRepository'
         arguments:  
@@ -30,6 +33,16 @@ services:
     cerad_person__person_repository:
         alias: cerad_person.person_repository.doctrine
         
+    cerad_person__person_plan_repository__doctrine:
+        class:  Cerad\Bundle\PersonBundle\EntityRepository\PersonPlanRepository
+        factory_service: 'cerad_person__entity_manager__doctrine'
+        factory_method:  'getRepository'
+        arguments:  
+            - 'Cerad\Bundle\PersonBundle\Entity\PersonPlan'
+            
+    cerad_person__person_plan_repository:
+        alias: cerad_person__person_plan_repository__doctrine
+        
     cerad_person__person_event_listener:
         class: '%cerad_person__person_event_listener__class%'
         calls:
@@ -38,7 +51,12 @@ services:
             - { name: kernel.event_subscriber }
         arguments:
             - 'cerad_person__person_repository'
-
+            
+    cerad_person__twig_extension:
+        class: Cerad\Bundle\PersonBundle\TwigExtension\PersonExtension
+        tags:
+            - { name: twig.extension }
+            
 # ====================================================
 # Data transformers
     cerad_person.aysor_id.data_transformer:

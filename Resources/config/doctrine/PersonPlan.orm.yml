@@ -1,6 +1,7 @@
 Cerad\Bundle\PersonBundle\Entity\PersonPlan:
     type:  entity
     table: person_plans
+    repositoryClass: Cerad\Bundle\PersonBundle\EntityRepository\PersonPlanRepository
     changeTrackingPolicy: NOTIFY
     uniqueConstraints:
         person_plan_project_person_id_index:
