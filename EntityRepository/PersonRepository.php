@@ -20,10 +20,13 @@ class PersonRepository extends BaseRepository // implements PersonRepositoryInte
     {
         // Avoid nulls
         if (!$param) return null;
-       
-        $id = (int)$param;
-        if ($id) return $this->find($id);
         
+        if (is_numeric($param))
+        {
+            $itemId = $this->find($param);
+            if ($itemId) return $itemGuid;
+        }
+
         $item1 = $this->findOneBy(array('guid' => $param));
         if ($item1) return $item1;
         
